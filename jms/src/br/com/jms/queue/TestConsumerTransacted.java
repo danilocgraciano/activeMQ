@@ -1,4 +1,4 @@
-package br.com.jms.topic;
+package br.com.jms.queue;
 
 import java.util.Properties;
 import java.util.Scanner;
@@ -12,11 +12,10 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TestConsumerEstoque {
+public class TestConsumerTransacted {
 
 	public static void main(String[] args) {
 
@@ -25,21 +24,16 @@ public class TestConsumerEstoque {
 			properties.put("java.naming.factory.initial", "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
 			// properties.put("java.naming.provider.url", "vm://localhost");
 			properties.put("java.naming.provider.url", "tcp://localhost:61616");
-			properties.put("topic.loja", "topico.loja");
+			properties.put("queue.financeiro", "fila.financeiro");
 
 			InitialContext context = new InitialContext(properties);
 			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
 			Connection connection = connectionFactory.createConnection();
-			connection.setClientID("estoque");
 			connection.start();
 
-			Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			Destination queue = (Destination) context.lookup("loja");
-			
-			//o booleano neste método informa que caso a conexao utilizada para enviar alguma informação adiante eu quero ficar sabendo ou não,
-			//ou seja, não quero consumir as mensagens que eu mesmo estou produzindo
-//			MessageConsumer consumer = session.createDurableSubscriber((Topic) queue,"assinatura");
-			MessageConsumer consumer = session.createDurableSubscriber((Topic) queue,"assinatura","ebook is null OR ebook=false", false);
+			Session session = connection.createSession(true, Session.SESSION_TRANSACTED);
+			Destination queue = (Destination) context.lookup("financeiro");
+			MessageConsumer consumer = session.createConsumer(queue);
 
 			// Message message = consumer.receive();
 
@@ -47,11 +41,19 @@ public class TestConsumerEstoque {
 
 				@Override
 				public void onMessage(Message message) {
-					TextMessage textMessage = (TextMessage) message;
+					TextMessage textTessage = (TextMessage) message;
+
 					try {
-						System.out.println(textMessage.getText());
-					} catch (JMSException e) {
-						e.printStackTrace();
+						System.out.println(message);
+						// CASO CLIENT_ACKNOWLEDGE
+						// message.acknowledge();
+						session.commit();
+					} catch (Exception e) {
+						try {
+							session.rollback();
+						} catch (JMSException e1) {
+							e1.printStackTrace();
+						}
 					}
 				}
 			});

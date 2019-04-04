@@ -43,11 +43,9 @@ public class TestConsumerComercial {
 
 				@Override
 				public void onMessage(Message message) {
+					TextMessage textMessage = (TextMessage) message;
 					try {
-						TextMessage textMessage = (TextMessage) message;
 						System.out.println(textMessage.getText());
-					} catch (ClassCastException e) {
-						e.printStackTrace();
 					} catch (JMSException e) {
 						e.printStackTrace();
 					}

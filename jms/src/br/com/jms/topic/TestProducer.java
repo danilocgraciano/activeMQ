@@ -6,6 +6,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.InitialContext;
@@ -31,8 +32,11 @@ public class TestProducer {
 			Destination queue = (Destination) context.lookup("loja");
 			MessageProducer producer = session.createProducer(queue);
 
-			for (int i = 1; i <= 100; i++)
-				producer.send(session.createTextMessage("<OrderID>" + i + "</OrderID>"));
+			for (int i = 1; i <= 100; i++) {
+				Message message = session.createTextMessage("<OrderID>" + i + "</OrderID>");
+				message.setBooleanProperty("ebook", false);
+				producer.send(message);
+			}
 
 			session.close();
 			connection.close();
