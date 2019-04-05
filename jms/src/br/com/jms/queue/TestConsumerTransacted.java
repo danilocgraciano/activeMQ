@@ -1,10 +1,8 @@
 package br.com.jms.queue;
 
-import java.util.Properties;
 import java.util.Scanner;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -15,27 +13,23 @@ import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import br.com.jms.JMS;
+
 public class TestConsumerTransacted {
 
 	public static void main(String[] args) {
 
 		try {
-			Properties properties = new Properties();
-			properties.put("java.naming.factory.initial", "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-			// properties.put("java.naming.provider.url", "vm://localhost");
-			properties.put("java.naming.provider.url", "tcp://localhost:61616");
-			properties.put("queue.financeiro", "fila.financeiro");
-
-			InitialContext context = new InitialContext(properties);
-			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
-			Connection connection = connectionFactory.createConnection();
+			JMS jms = new JMS();
+			Connection connection = jms.getConnection();
 			connection.start();
+
+			InitialContext context = jms.getContext();
+
 
 			Session session = connection.createSession(true, Session.SESSION_TRANSACTED);
 			Destination queue = (Destination) context.lookup("financeiro");
 			MessageConsumer consumer = session.createConsumer(queue);
-
-			// Message message = consumer.receive();
 
 			consumer.setMessageListener(new MessageListener() {
 

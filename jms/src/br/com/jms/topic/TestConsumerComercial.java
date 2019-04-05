@@ -1,10 +1,8 @@
 package br.com.jms.topic;
 
-import java.util.Properties;
 import java.util.Scanner;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -16,28 +14,24 @@ import javax.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import br.com.jms.JMS;
+
 public class TestConsumerComercial {
 
 	public static void main(String[] args) {
 
 		try {
-			Properties properties = new Properties();
-			properties.put("java.naming.factory.initial", "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-			// properties.put("java.naming.provider.url", "vm://localhost");
-			properties.put("java.naming.provider.url", "tcp://localhost:61616");
-			properties.put("topic.loja", "topico.loja");
 
-			InitialContext context = new InitialContext(properties);
-			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
-			Connection connection = connectionFactory.createConnection();
+			JMS jms = new JMS();
+			Connection connection = jms.getConnection();
 			connection.setClientID("comercial");
 			connection.start();
 
+			InitialContext context = jms.getContext();
+
 			Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination queue = (Destination) context.lookup("loja");
-			MessageConsumer consumer = session.createDurableSubscriber((Topic) queue,"assinatura");
-
-			// Message message = consumer.receive();
+			MessageConsumer consumer = session.createDurableSubscriber((Topic) queue, "assinatura");
 
 			consumer.setMessageListener(new MessageListener() {
 
