@@ -18,8 +18,9 @@ public class JMS {
 			// properties.put("java.naming.provider.url", "vm://localhost");
 			properties.put("java.naming.provider.url", "tcp://localhost:61616");
 
-			properties.put("queue.financeiro", "fila.financeiro");
 			properties.put("queue.DLQ", "ActiveMQ.DLQ");
+			properties.put("queue.financeiro", "fila.financeiro");
+			properties.put("queue.log", "fila.log");
 
 			properties.put("topic.loja", "topico.loja");
 
